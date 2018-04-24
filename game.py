@@ -1,5 +1,3 @@
-# from microbit import *
-
 import serial
 import threading
 from queue import Queue
@@ -64,7 +62,6 @@ def showDir(n):
         4 : "None"
     }
     return dirs[n]
-
 
 
 if __name__ == "__main__":
