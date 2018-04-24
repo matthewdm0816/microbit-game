@@ -10,9 +10,8 @@ radio.config(length=64,
 uart.init(115200)             
 
 while True:
-    incoming = radio.receive()
-    uart.write(incoming)
-
-
-
-
+    try:
+        incoming = radio.receive()
+        uart.write(incoming)
+    except:
+        continue

@@ -37,18 +37,34 @@ def getDirection(x, y, z):
     :param x: x axis acceleration value
     :param y: y axis acceleration value
     :param z: z axis acceleration value
-    :return: direction: 0, 1, 2, 3 --- UP, RIGHT, DOWN, LEFT
+    :return: direction: 0, 1, 2, 3, 4 --- UP, RIGHT, DOWN, LEFT, NONE
     """
     if abs(x) > abs(y):
-        if x > 100:
+        if x > 280:
+            return 1
+        elif x < -280:
+            return 3
+        else:
+            return 4
+    else:
+        if y > 280:
+            return 2
+        elif y < -280:
             return 0
         else:
-            return 2
-    else:
-        if y > 100:
-            return 1
-        else:
-            return 3
+            return 4
+
+
+def showDir(n):
+    dirs = {
+        0 : "Up",
+        1 : "Right",
+        2 : "Down",
+        3 : "Left",
+        4 : "None"
+    }
+    return dirs[n]
+
 
 
 if __name__ == "__main__":
@@ -56,7 +72,9 @@ if __name__ == "__main__":
     thrd.start()
     while True:
         id, x, y, z = q.get()
-        print(id, x, y, z)
+        # print(id, x, y, z)
+        dirNum = getDirection(x, y, z)
+        print(id, showDir(dirNum))
 
 
 
