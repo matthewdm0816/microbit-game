@@ -19,7 +19,7 @@ def readAcc():
     try:
         while True:
             # client send data each 50ms?
-            data = list(map(int, s.readline().rstrip().split(" ")))
+            data = list(map(int, s.readline().decode("utf-8").rstrip().split(" ")))
             # data = s.readline()
             lock.acquire()
             try:
