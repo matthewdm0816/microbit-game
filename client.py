@@ -13,10 +13,12 @@ def get_data():
     uart.write(str(x) + " " + str(y) + " " + str(z) + "\n")
 
 
+started = False
 while True:
     a, b = button_a.was_pressed(), button_b.was_pressed
     if a is True:
-        pass
-    # display.scroll("COIN INSERTED, GAME START")
-    get_data()
+        started = True
+        display.scroll("COIN INSERTED, GAME START")
+    if started is True:
+        get_data()
     sleep(REFRESH)
