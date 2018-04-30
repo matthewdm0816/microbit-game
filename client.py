@@ -6,7 +6,7 @@ display.scroll("INSERT COIN", wait=False, loop=True)
 ID = 2
 BAUD = 115200  # default BAUD rate
 uart.init(BAUD)
-TICK = 32
+TICK = 128
 REFRESH = 1000 // TICK
 
 radio.on()
@@ -29,12 +29,13 @@ def get_data():
 started = False
 paused = False
 while True:
-    a, b = button_a.was_pressed(), button_b.was_pressed
+    a, b = button_a.was_pressed(), button_b.was_pressed()
     if b is True:
-        paused = not paused
+        paused = True
     if a is True:
         started = True
         display.scroll("COIN INSERTED, GAME START", wait=False)
     if started is True:
         get_data()
+        # TODO: implement direction indication
     sleep(REFRESH)
