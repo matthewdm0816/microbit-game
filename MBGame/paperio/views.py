@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
-import json
+import json, time
 
 def index(req):
     return HttpResponse("Hello World!")
@@ -17,23 +17,38 @@ def game(request):
     })
 
 def check(request):
+    try:
+        check.lastId
+    except:
+        check.lastId = -1
+
+    eff_data = {}
     with open("stats.json", mode='r') as f:
-        data = json.load(f)
+        data = f.read().split("$")[:-1]
+        item = {}
+        for str in data:
+            global item
+            try:
+                item = json.loads(str)
+            except:
+                continue
+            if item["actionId"] >= check.lastId:
+                id = item["actionId"]
+                eff_data[id] = item["action"]
+        check.lastId = item["actionId"]
     """
     data in form: (?)
     {
-        1 : {
-            1 : direction1,
-            2 : direction2,
-            3 : direction3,
+        time1 : {
+            'id' : 1,
+            'direction' : 3 // DOWN
         ...},
-        2 : {
-            1 : ...
-            2 : ...
-            ...
-        }
+        time2 : {
+            'id' : 2
+            'direction' : 2 // UP
+        },
+        ...
     }
     """
-    return HttpResponse(json.dumps(data))
+    return HttpResponse(json.dumps(eff_data))
 
-# Create your views here.
