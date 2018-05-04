@@ -2,7 +2,6 @@ from microbit import *
 import radio
 display.scroll("INSERT COIN", wait=False, loop=True)
 
-
 ID = 2
 BAUD = 115200  # default BAUD rate
 uart.init(BAUD)
@@ -20,38 +19,36 @@ def getDirection(x, y, z):
     """
     :return: direction: 0, 1, 2, 3, 4 --- UP, RIGHT, DOWN, LEFT, NONE
     """
+    limit = 330
     if abs(x) > abs(y):
-        if x > 0:
+        if x > limit:
             return 1
-        elif x <= -0:
+        elif x <= -limit:
             return 3
         else:
             return 4
     else:
-        if y > 0:
+        if y > limit:
             return 2
-        elif y <= -0:
+        elif y <= -limit:
             return 0
         else:
             return 4
 
-
+old_dir = 4
 def getData():
-    try:
-        getData.dir
-    except:
-        getData.dir = 4
+    global old_dir
     x, y, z = \
         accelerometer.get_x(), accelerometer.get_y(), accelerometer.get_z()
     # a, b = button_a.was_pressed(), button_b.was_pressed()
     # data = str(ID) + " " + str(x) + " " + str(y) + " " + str(z) + "\n"
     dir = getDirection(x, y, z)
     data = str(ID) + " " + str(dir) + "\n"
-    if dir != getData.dir:
+    if dir != old_dir:
         radio.send(data)
-    uart.write(data)  # for DEBUG
+        old_dir = dir
+        uart.write(data)  # for DEBUG
     return dir
-
 
 def displayArrow(dir):
     # TODO: implement direction indication
@@ -67,13 +64,15 @@ def displayArrow(dir):
         2 : ["downleft", "downright"],
         3 : ["upleft", "downleft"],
     }
+    display.clear()
     if dir == 4:
-        display.clear()
+        return
     for direction in arrows[dir]:
-        for pixels in pixels[direction]:
-            for pixel in pixels:
-                x, y = pixel
-                display.set_pixel(x, y, 9)
+        pixels_ = pixels[direction]
+        for pixel in pixels_:
+            # print(pixels_)
+            x, y = pixel
+            display.set_pixel(x, y, 9)
 
 
 started = False
@@ -84,7 +83,7 @@ while True:
         paused = True
     if a is True:
         started = True
-        display.scroll("COIN INSERTED, GAME START", wait=False)
+        display.scroll("COIN INSERTED, GAME START", wait=False, delay=50)
     if started is True:
         dir = getData()
         displayArrow(dir)
