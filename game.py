@@ -1,8 +1,8 @@
 import serial
 import threading
 from queue import Queue
-import math, json, time
-PORT = "/dev/tty.usbmodem1412"
+import math, json, time, os, sys
+PORT = "/dev/tty.usbmodem1422"
 BAUD = 115200
 s = serial.Serial(PORT)
 s.baudrate  = BAUD
@@ -63,7 +63,7 @@ def showDir(n):
     }
     return dirs[n]
 
-
+pathString = "game/MBGame/paperio/stats.json"
 if __name__ == "__main__":
     thrd = threading.Thread(target=readAcc)
     thrd.start()
@@ -79,6 +79,11 @@ if __name__ == "__main__":
                 "direction" : dirNum,
             }
         }
-        with open("MBGame/paperio/stats.json", "a") as f:
+
+        if os.path.exists(pathString) is False:
+            with open(pathString, 'x') as f:
+                pass
+
+        with open(pathString, "a") as f:
             f.write(json.dumps(action) + "$")
         print(actionId, id, showDir(dirNum))

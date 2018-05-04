@@ -23,16 +23,16 @@ def check(request):
         check.lastId = -1
 
     eff_data = {}
-    with open("stats.json", mode='r') as f:
+    with open("paperio/stats.json", mode='r') as f:
         data = f.read().split("$")[:-1]
         item = {}
         for str in data:
-            global item
+            # global item
             try:
                 item = json.loads(str)
             except:
                 continue
-            if item["actionId"] >= check.lastId:
+            if item["actionId"] > check.lastId:
                 id = item["actionId"]
                 eff_data[id] = item["action"]
         check.lastId = item["actionId"]
