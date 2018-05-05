@@ -63,6 +63,7 @@ def displayArrow(dir):
         1 : ["upright", "downright"],
         2 : ["downleft", "downright"],
         3 : ["upleft", "downleft"],
+        4 : ["upleft", "downleft", "upright", "downright"]
     }
     display.clear()
     if dir == 4:
