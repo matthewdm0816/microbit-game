@@ -19,7 +19,7 @@ def getDirection(x, y, z):
     """
     :return: direction: 0, 1, 2, 3, 4 --- UP, RIGHT, DOWN, LEFT, NONE
     """
-    limit = 330
+    limit = 250
     if abs(x) > abs(y):
         if x > limit:
             return 1

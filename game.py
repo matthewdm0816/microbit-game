@@ -69,6 +69,10 @@ if __name__ == "__main__":
     thrd.start()
     action = {}
     actionId = 0
+    with open(pathString, "w") as f:
+        # clear stats.json
+        pass
+
     while True:
         id, dirNum = q.get()
         actionId += 1
