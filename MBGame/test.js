@@ -12,7 +12,7 @@ const agentCount = 2;
 var actionId = 0;
 var timeInterval = 80;
 var directions = ["down", "up"];
-var positions = [[30, 30], [100, 100]];
+var positions = [[100, 100], [10, 10]];
 var drawing = false;
 // var rectsInd;
 const directionWays = {
@@ -96,17 +96,18 @@ function findRects(i, j, id){
 	var points = [];
 
 	while(q.length != 0){
-		point = q.shift();
+		point = q.pop();
 		points.push(point);
 		var m = point[0], n = point[1];
 		d[m][n] = id;
 		for(var k = 0; k < dirs.length; k++){
 			var p = addPoint(dirs[k], point);
+			var x_ = p[0], y_ = p[1];
 			if(isValid(p) == false){ // if reached boundaries
-				open = false;
+				open = true;
 			}
 			if(isValid(p)){
-				if(d[m][n] != id && rectsInd[m][n] != id && lineInd[m][n] != id){
+				if(d[x_][y_] != id && rectsInd[x_][y_] != id && lineInd[x_][y_] != id){
 					q.push(p);
 				}
 			}
@@ -124,16 +125,16 @@ function fillArea(id){
 	var dummyRects = genArray(120, 120, function(x, y){ return -1; });
 	for(var i = 0; i < 120; i++){
 		for(var j = 0; j < 120; j++){
-			if(rectsInd[i][j] == -1 && lineInd[i][j] == -1 && dummyRects[i][j] == -1){
+			if((rectsInd[i][j] == -1) && (lineInd[i][j] == -1) && (dummyRects[i][j] == -1)){
 				ret = findRects(i, j, id);
-				if(ret.open){
-					for (var i = ret.points.length - 1; i >= 0; i--) {
-						var m = ret.points[i][0], n = ret.points[i][1];
+				if(ret.open == false){
+					for (var c = ret.points.length - 1; c >= 0; c--) {
+						var m = ret.points[c][0], n = ret.points[c][1];
 						dummyRects[m][n] = id;
 					}
 				}else{
-					for (var i = ret.points.length - 1; i >= 0; i--) {
-						var m = ret.points[i][0], n = ret.points[i][1];
+					for (var c = ret.points.length - 1; c >= 0; c--) {
+						var m = ret.points[c][0], n = ret.points[c][1];
 						dummyRects[m][n] = -2;
 					}
 				}
@@ -187,8 +188,8 @@ function updateView(data){
 		if(rectsInd[y][x] != i){ // if out of any blocks, switch drawing to true
 			drawing = true;
 		}
-		if(lineInd[y][x] != -1 && lineInd[y][x] != i){ // if enconters oppenents
-			agentState[lineInd[y][x]] = false;  // mark it DEAD
+		if(lineInd[y][x] != -1 && lineInd[y][x] != i){ // if encounters oppenents
+			agentState[lineInd[y][x]] = false;  // mark opponent DEAD
 		}
 		if(rectsInd[y][x] == i && drawing == false){ // if inside blocks and not drawing
 			continue;
@@ -196,7 +197,7 @@ function updateView(data){
 		if(lineInd[y][x] == i){ // if meets itself
 			// agentState[lineInd[y][x]] = false; // mark itself DEAD
 		}
-		if(rectsInd[y][x] == i || lineInd[y][x] == i){ // if meets the blocks of itself
+		if(rectsInd[y][x] == i){ // if meets the blocks of itself
 			// TODO: fill area
 			drawRect(context, positions[i][0], positions[i][1], i, true);
 			fillArea(i);
@@ -238,7 +239,7 @@ window.onload = function(){
 	for (var k = positions.length - 1; k >= 0; k--) {
 		for (var i = dirs.length - 1; i >= 0; i--) {
 			var tmp = addPoint(positions[k], dirs[i]);
-			drawRect(context, tmp[0], tmp[1], false, true);
+			drawRect(context, tmp[0], tmp[1], k, false, true);
 		}
 	}
 	
