@@ -93,6 +93,7 @@ function clearRect(context, x, y){ // not used ?
 	// context.fillStyle = clearStyle;
 	context.clearRect(x * rectWidth, y * rectWidth, rectWidth, rectWidth);
 	rectsInd[y][x] = -1;
+	lineInd[y][x] = -1;
 }
 
 function shuffleMusic(){
@@ -116,7 +117,7 @@ function reportDead(context, id){ // 0, or 1
 		positions[id] = [Math.round(Math.random() * 80) + 20, Math.round(Math.random() * 80) + 20]; // regenerate positions
 		shuffleMusic(); // shuffles music
 		bgm.play();
-		initRects(id);
+		initRects(1-id); // NOTE: TO BE MODIFIED
 	} // revive operations
 }
 
@@ -319,9 +320,17 @@ function stateChange(){
 	}
 }
 
-function initRects(idExcept = -1){
+function initRects(idExcept = -1){ // idExcept -- winner
 	// if(idExcept == -1){ clearAllRects(); }
-	
+	for(var p = 0; p < 120; p++){
+		for(var q = 0; q < 120; q++){
+			if(lineInd[p][q] == idExcept || rectsInd[p][q] == idExcept){
+				// clearRect(context, q, p);
+			}else{
+				clearRect(context, q, p);
+			}
+		}
+	}
 	var dirs = [[0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1], [0, 0]];
 	for (var k = positions.length - 1; k >= 0; k--) {
 		if(k == idExcept){
