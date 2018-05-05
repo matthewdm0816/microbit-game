@@ -2,7 +2,7 @@ from microbit import *
 import radio
 display.scroll("INSERT COIN", wait=False, loop=True)
 
-ID = 2
+ID = 1
 BAUD = 115200  # default BAUD rate
 uart.init(BAUD)
 TICK = 128
@@ -19,7 +19,7 @@ def getDirection(x, y, z):
     """
     :return: direction: 0, 1, 2, 3, 4 --- UP, RIGHT, DOWN, LEFT, NONE
     """
-    limit = 250
+    limit = 330
     if abs(x) > abs(y):
         if x > limit:
             return 1
@@ -63,7 +63,6 @@ def displayArrow(dir):
         1 : ["upright", "downright"],
         2 : ["downleft", "downright"],
         3 : ["upleft", "downleft"],
-        4 : ["upleft", "downleft", "upright", "downright"]
     }
     display.clear()
     if dir == 4:
