@@ -13,7 +13,7 @@ const agentCount = 2;
 var actionId = 0;
 var timeInterval = 80;
 var directions = ["down", "up"];
-var positions = [[100, 100], [10, 10]];
+var positions = [[30, 30], [10, 10]];
 var drawing = true;
 var musicCount = 5;
 // var rectsInd;
@@ -77,6 +77,9 @@ function drawRect(context, x, y, id, isPoint = false, isField = false){
 		context.fillStyle = fillStyle[id];
 	}
 	context.fillRect(x * rectWidth, y * rectWidth, rectWidth, rectWidth);
+	if(rectsInd[y][x] == id){
+		isField == true;
+	}
 	if(isField == false){
 		lineInd[y][x] = id;
 	}else{
@@ -86,7 +89,7 @@ function drawRect(context, x, y, id, isPoint = false, isField = false){
 	// rectsInd[y][x] = id;
 }
 
-function clearRect(context, x, y){
+function clearRect(context, x, y){ // not used ?
 	// context.fillStyle = clearStyle;
 	context.clearRect(x * rectWidth, y * rectWidth, rectWidth, rectWidth);
 	rectsInd[y][x] = -1;
@@ -106,13 +109,14 @@ function reportDead(context, id){ // 0, or 1
 	audio.onended = function(){
 		audio.currentTime = 0;
 		agentState = [true, true]; // reinitialize life
-		positions = [
+		/*positions = [
 			[Math.round(Math.random() * 80) + 20, Math.round(Math.random() * 80) + 20],
 			[Math.round(Math.random() * 80) + 20, Math.round(Math.random() * 80) + 20]
-		] // regenerate positions
+		]*/
+		positions[id] = [Math.round(Math.random() * 80) + 20, Math.round(Math.random() * 80) + 20]; // regenerate positions
 		shuffleMusic(); // shuffles music
 		bgm.play();
-		initRects();
+		initRects(id);
 	} // revive operations
 }
 
@@ -135,19 +139,19 @@ function findRects(i, j, id){
 	var points = [];
 
 	while(q.length != 0){
-		point = q.shift();
+		point = q.pop();
 		points.push(point);
 		var m = point[0], n = point[1];
 		// vis[m][n] = id;
 		for(var k = 0; k < dirs.length; k++){
 			var p = addPoint(dirs[k], point);
 			var x_ = p[0], y_ = p[1];
-			if(isValid(p) == false){ // if reached boundaries
+			if(isValid(p) == false){ // if reaches boundaries
 				open = true;
 			}
 			if(isValid(p)){
-				if(vis[x_][y_] == false && rectsInd[x_][y_] != id && lineInd[x_][y_] != id){
-					q.push(p);
+				if((vis[x_][y_] == false) && (lineInd[x_][y_] != id) && (rectsInd[x_][y_] != id)){
+					q.push(p); // if not visited, not in block or on line
 				}
 				vis[x_][y_] = true;
 			}
@@ -161,16 +165,18 @@ function findRects(i, j, id){
 }
 
 
-function fillArea(id){
+function fillArea(id_){
+	// console.log("fillING AREA:" + id_);
+
 	var dummyRects = genArray(120, 120, function(x, y){ return -1; });
 	for(var i = 0; i < 120; i++){
 		for(var j = 0; j < 120; j++){
-			if((rectsInd[i][j] == -1) && (lineInd[i][j] == -1) && (dummyRects[i][j] == -1)){
-				ret = findRects(i, j, id);
+			if((lineInd[i][j] == -1) && (dummyRects[i][j] == -1) && (rectsInd[i][j] == -1)){
+				ret = findRects(i, j, id_);
 				if(ret.open == false){
 					for (var c = ret.points.length - 1; c >= 0; c--) {
 						var m = ret.points[c][0], n = ret.points[c][1];
-						dummyRects[m][n] = id;
+						dummyRects[m][n] = id_;
 					}
 				}else{
 					for (var c = ret.points.length - 1; c >= 0; c--) {
@@ -181,28 +187,38 @@ function fillArea(id){
 			}
 		}
 	}
+	
 	for(var i = 0; i < 120; i++){ 
 		for(var j = 0; j < 120; j++){
-			if((dummyRects[i][j] == id) || (lineInd[i][j] == id)){
-				drawRect(context, j, i, id, false, true);
+			if((dummyRects[i][j] == id_) || (lineInd[i][j] == id_)){
+				drawRect(context, j, i, id_, false, true);
+				// lineInd[i][j] = -1;
+				if(lineInd[i][j] == id_){ // change it to not lined!????
+					lineInd[i][j] = -1;
+				}
+				rectsInd[i][j] = id_;
 			}
 		}
 	}
-	/*rectsInd = genArray(120, 120, function(x, y){
-		if(lineInd[x][y] == id){
-			return id;
+
+
+	/*
+	rectsInd = genArray(120, 120, function(x, y){
+		if(lineInd[x][y] == id_){
+			return id_;
 		}else{
 			return rectsInd[x][y]
 		}
-	});*/
+	});
+	
 	lineInd = genArray(120, 120, function(x, y){ 
-		if(lineInd[x][y] == id){
-			rectsInd[x][y] = id;
+		if(lineInd[x][y] == id_){
+			rectsInd[x][y] = id_;
 			return -1;
 		}else{
 			return lineInd[x][y];
 		}
-	});
+	});*/
 }
 
 function updateView(data){
@@ -229,28 +245,33 @@ function updateView(data){
 		var directionWay = directionWays[directions[i]];
 		drawRect(context, positions[i][0], positions[i][1], i, false);
 		// replace last point
+		var oldP;
 		var nextP = addPoint(positions[i], directionWay);
+		oldP = positions[i].map(function(t){return t;});
 		if(isValid(nextP)){
+			// oldP = positions[i].map(function(t){return t;});
 			positions[i] = nextP;
 		}
 		// drawRect(context, positions[i][0], positions[i][1], i, true);
 		// draw current agent
 		var x = positions[i][0], y = positions[i][1];
+		// lineInd[y][x] == i;
 		if(rectsInd[y][x] != i){ // if out of any blocks, switch drawing to true
 			drawing = true;
 		}
-		if(lineInd[y][x] != -1 && lineInd[y][x] != i){ // if encounters oppenents
+		if((lineInd[y][x] != -1) && (lineInd[y][x] != i)){ // if encounters oppenents
 			agentState[lineInd[y][x]] = false;  // mark opponent DEAD
 		}
-		if(rectsInd[y][x] == i && drawing == false){ // if inside blocks and not drawing
-			drawRect(context, positions[i][0], positions[i][1], i, true);
+		if((rectsInd[y][x] == i) /*&& (drawing == false)*/){ // if inside blocks and not drawing
+			drawRect(context, positions[i][0], positions[i][1], i, true, true);
 			continue;
 		}
-		if(lineInd[y][x] == i){ // if meets itself
-			// agentState[lineInd[y][x]] = false; // mark itself DEAD
+		var nnp = addPoint(positions[i], directionWay);
+		if(lineInd[y][x] == i && (isValid(nnp))){ // if meets itself
+			agentState[lineInd[y][x]] = false; // mark itself DEAD
 		}
-		if((rectsInd[y][x] == i) || (lineInd[y][x] == i)){ // if meets the blocks of itself
-			// TODO: fill area
+		
+		if(near(y, x, i, oldP) && isValid(nnp)){ // if meets the blocks of itself, and not heading out
 			drawRect(context, positions[i][0], positions[i][1], i, true);
 			fillArea(i);
 			if(rectsInd[y][x] == i){
@@ -258,7 +279,31 @@ function updateView(data){
 			}
 		}
 		drawRect(context, positions[i][0], positions[i][1], i, true);
+		
 	}
+}
+
+function cmp(a, b){ return a[0] == b[0] && a[1] == b[1]; }
+function swapA(a) {return [a[1], a[0]]; }
+
+function near(i, j, id, oldP){
+	var dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+	// var n = false;
+	// var rd = exceptDir.map(function(i){ return -i; });
+	for (var cl = dirs.length - 1; cl >= 0; cl--) {
+		var np = addPoint([i, j], dirs[cl]);
+		if(cmp(np, swapA(oldP))){
+			// console.log("here closes");
+			continue;
+		}
+		var xx = np[0], yy = np[1];
+		if(isValid(np)){
+			if(lineInd[xx][yy] == id || rectsInd[xx][yy] == id){
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 function stateChange(){
@@ -274,10 +319,14 @@ function stateChange(){
 	}
 }
 
-function initRects(){
-	clearAllRects();
+function initRects(idExcept = -1){
+	// if(idExcept == -1){ clearAllRects(); }
+	
 	var dirs = [[0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1], [0, 0]];
 	for (var k = positions.length - 1; k >= 0; k--) {
+		if(k == idExcept){
+			continue;
+		}
 		for (var i = dirs.length - 1; i >= 0; i--) {
 			var tmp = addPoint(positions[k], dirs[i]);
 			if(isValid(tmp)){
