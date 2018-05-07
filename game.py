@@ -2,7 +2,7 @@ import serial
 import threading
 from queue import Queue
 import math, json, time, os, sys
-PORT = "/dev/tty.usbmodem1422"
+PORT = "/dev/tty.usbmodem1422" # serial identifier
 BAUD = 115200 # default serial rate
 s = serial.Serial(PORT) # initialize serial port
 s.baudrate  = BAUD
