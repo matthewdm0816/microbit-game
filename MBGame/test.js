@@ -1,22 +1,23 @@
-var req;
+var req; // global XMLHttpRequest object, for polls to update view
 // var data;
 // var stopped = false;
-var threadID;
-var canvas, context;
-const rectWidth = 5;
-const fillStyle = [randomColorString(), randomColorString()];
+var threadID; // ID of intervalss
+var canvas, context; 
+const rectWidth = 5; // rectangle width: 5px
+const fillStyle = [randomColorString(), randomColorString()]; // randomized color of blocks
 const agentStyle = [addGray(fillStyle[0]), addGray(fillStyle[1])];
 // const agentStyle = [randomColorString(), randomColorString()];
-var agentState = [true, true];
-const clearStyle = "#FFFFFF";
-const agentCount = 2;
+var agentState = [true, true]; // agent living style
+const clearStyle = "#FFFFFF"; 
+const agentCount = agentState.length;
 var actionId = 0;
 var timeInterval = 80;
-var directions = ["down", "up"];
-var positions = [[30, 30], [10, 10]];
-var drawing = true;
-var musicCount = 5;
+var directions = ["down", "up"]; // initial directions
+var positions = [[30, 30], [10, 10]]; // initial postions
+var drawing = [false, false]; // initial drawing state(?)
+var musicCount = 5; // track amount
 // var rectsInd;
+
 const directionWays = {
 	"up"   : [0, -1],
 	"down" : [0, 1],
@@ -26,8 +27,9 @@ const directionWays = {
 const directionStrings = [
 	"up", "right", "down", "left" // 0, 1, 2, 3
 ];
-var audio, bgm, resetButton;
+var audio, bgm, resetButton; // corresponding DOM elements
 
+// generate array according to generator
 function genArray(x, y, generator){
 	var p = [];
 	for(var i = 0; i < y; i++){
@@ -40,19 +42,21 @@ function genArray(x, y, generator){
 	return p;
 }
 
-var rectsInd = genArray(120, 120, function(x, y){ return -1; });
-var lineInd = genArray(120, 120, function(x, y){ return -1; });
+var rectsInd = genArray(120, 120, function(x, y){ return -1; }); // inidicate painted blocks
+var lineInd = genArray(120, 120, function(x, y){ return -1; }); // indicate line blocks
 
 function getDirectionString(dirNum){
 	return directionStrings[dirNum];
 }
 
+// add more gray to color(one channel)
 function moreGray(color){
 	var clr = parseInt(color, 16);
 	clr = Math.min(Math.floor(clr * 0.65), 255);
 	return clr.toString(16);
 }
 
+// add more gray to color(3 channels)
 function addGray(colorstr){
 	var clr = colorstr.slice(1, colorstr.length)
 	var r = moreGray(clr.slice(0, 2)), 
@@ -61,14 +65,17 @@ function addGray(colorstr){
 	return "#" + r + g + b;
 }
 
-function randomColor(){ // a rather light color! (for lines)
+// generate a rather light color, for lines and blocks
+function randomColor(){ 
 	return Math.floor(((Math.random() + 1) * 128)).toString(16);
 }
 
+// generate full color string
 function randomColorString(){
 	return "#" + randomColor() + randomColor() + randomColor();
 }
 
+// draw rectangle(pixel) at given position
 function drawRect(context, x, y, id, isPoint = false, isField = false){
 	// x, y ranges from 0 to 119
 	if(isPoint){
@@ -89,6 +96,7 @@ function drawRect(context, x, y, id, isPoint = false, isField = false){
 	// rectsInd[y][x] = id;
 }
 
+// clear rectangle at given pos
 function clearRect(context, x, y){ // not used ?
 	// context.fillStyle = clearStyle;
 	context.clearRect(x * rectWidth, y * rectWidth, rectWidth, rectWidth);
@@ -96,12 +104,14 @@ function clearRect(context, x, y){ // not used ?
 	lineInd[y][x] = -1;
 }
 
+// 老板, 换碟!
 function shuffleMusic(){
 	var bgm_music = document.getElementById("bgmMusic")
 	bgm_music.src = "/static/paperio/" + Math.ceil(Math.random() * 5)  + ".mp3";
 	bgm.load();
 }
 
+// called when dead, plays a short music and restart
 function reportDead(context, id){ // 0, or 1
 	// TODO: REPORT DEAD
 	// DISPALY A DEAD MESSAGE
@@ -121,14 +131,17 @@ function reportDead(context, id){ // 0, or 1
 	} // revive operations
 }
 
+// point addition
 function addPoint(a, b){
 	return [a[0] + b[0], a[1] + b[1]];
 }
 
+// check point validity(in canvas)
 function isValid(a){
 	return a[0] >= 0 && a[0] < 120 && a[1] >= 0 && a[1] < 120;
 }
 
+// find all near blocks using DFS, and decide if the area is open(connected to boundary)
 function findRects(i, j, id){
 	var vis = genArray(120, 120, function(x, y){ return false; });
 	var q = [];
@@ -165,7 +178,7 @@ function findRects(i, j, id){
 	};
 }
 
-
+// fill all closed areas
 function fillArea(id_){
 	// console.log("fillING AREA:" + id_);
 
@@ -222,8 +235,12 @@ function fillArea(id_){
 	});*/
 }
 
+// read data and update canvas
 function updateView(data){
+	// obtain canvas object
 	canvas = document.getElementById("game");
+
+	// check whether data is empty
 	var dummy_key = -1;
 	for(key in data){
 		dummy_key = key;
@@ -231,6 +248,8 @@ function updateView(data){
 	if(dummy_key != -1){
 		console.log(data);
 	}
+
+	// change direction
 	for(key in data){
 		action = data[key];
 		if(action.direction != 4){
@@ -238,17 +257,23 @@ function updateView(data){
 			// -1! id: 1 => 0th in position
 		}
 	}
+
+	// move forward for each agent
 	for (var i = directions.length - 1; i >= 0; i--) { // iterates through agents
+
+		// if dead
 		if(agentState[i] == false){
 			reportDead(context, i);
 			continue;
 		}
+
 		var directionWay = directionWays[directions[i]];
-		drawRect(context, positions[i][0], positions[i][1], i, false);
-		// replace last point
-		var oldP;
-		var nextP = addPoint(positions[i], directionWay);
-		oldP = positions[i].map(function(t){return t;});
+		// replace previous point by normal style
+		drawRect(context, positions[i][0], positions[i][1], i, false); 
+
+		var oldP; // prev point
+		var nextP = addPoint(positions[i], directionWay); // next point
+		oldP = positions[i].map(function(t){return t;}); // copy previous point
 		if(isValid(nextP)){
 			// oldP = positions[i].map(function(t){return t;});
 			positions[i] = nextP;
@@ -258,25 +283,25 @@ function updateView(data){
 		var x = positions[i][0], y = positions[i][1];
 		// lineInd[y][x] == i;
 		if(rectsInd[y][x] != i){ // if out of any blocks, switch drawing to true
-			drawing = true;
+			drawing[i] = true;
 		}
 		if((lineInd[y][x] != -1) && (lineInd[y][x] != i)){ // if encounters oppenents
 			agentState[lineInd[y][x]] = false;  // mark opponent DEAD
 		}
-		if((rectsInd[y][x] == i) && (drawing == false)){ // if inside blocks and not drawing
+		if((rectsInd[y][x] == i) && (drawing[i] == false)){ // if inside blocks and not drawing
 			drawRect(context, positions[i][0], positions[i][1], i, true, true);
 			continue;
 		}
 		var nnp = addPoint(positions[i], directionWay);
-		if(lineInd[y][x] == i && (isValid(nnp))){ // if meets itself
+		if(lineInd[y][x] == i && (isValid(nnp))){ // if meets itself, thus go backward
 			agentState[lineInd[y][x]] = false; // mark itself DEAD
 		}
 		
 		if(near(y, x, i, oldP) && isValid(nnp)){ // if meets the blocks of itself, and not heading out
-			drawRect(context, positions[i][0], positions[i][1], i, true);
-			fillArea(i);
+			drawRect(context, positions[i][0], positions[i][1], i, true); // draw agent style point
+			fillArea(i); // fill all closed areas
 			if(rectsInd[y][x] == i){
-				drawing = false; // switch to not drawing
+				drawing[i] = false; // switch to not drawing
 			}
 		}
 		drawRect(context, positions[i][0], positions[i][1], i, true);
@@ -284,9 +309,13 @@ function updateView(data){
 	}
 }
 
+// compare points
 function cmp(a, b){ return a[0] == b[0] && a[1] == b[1]; }
+
+// swap x and y of a point
 function swapA(a) {return [a[1], a[0]]; }
 
+// check if near any line/block
 function near(i, j, id, oldP){
 	var dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 	// var n = false;
@@ -307,6 +336,7 @@ function near(i, j, id, oldP){
 	return false;
 }
 
+// called when state changes
 function stateChange(){
 	if(req.readyState == 4){
 		if(req.status == 200){
@@ -320,12 +350,13 @@ function stateChange(){
 	}
 }
 
-function initRects(idExcept = -1){ // idExcept -- winner
+// init rectangle except for ONE player
+function initRects(idExcept = -1){ // idExcept -- winner, if -1, then clear all
 	// if(idExcept == -1){ clearAllRects(); }
 	for(var p = 0; p < 120; p++){
 		for(var q = 0; q < 120; q++){
 			if(idExcept == -1){
-				clearRect(context, q, p);
+				clearRect(context, q, p); // NEED TEST
 				continue;
 			}
 			if(lineInd[p][q] == idExcept || rectsInd[p][q] == idExcept){
@@ -335,6 +366,8 @@ function initRects(idExcept = -1){ // idExcept -- winner
 			}
 		}
 	}
+
+	// draw initial pixels
 	var dirs = [[0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1], [0, 0]];
 	for (var k = positions.length - 1; k >= 0; k--) {
 		if(k == idExcept){
@@ -349,12 +382,14 @@ function initRects(idExcept = -1){ // idExcept -- winner
 	}
 }
 
+// clear all retangles plotting history
 function clearAllRects(){
 	context.clearRect(0, 0, 600, 600);
 	rectsInd = genArray(120, 120, function(x, y){ return -1; });
 	lineInd = genArray(120, 120, function(x, y){ return -1; });
 }
 
+// start polling
 function startCheck(){
 	return setInterval(function(){
 		req = new XMLHttpRequest();
@@ -367,11 +402,14 @@ function startCheck(){
 	}, timeInterval);
 }
 
+// stop polling
 function stopCheck(){
 	clearInterval(threadID);
 }
 
+// on window loaded
 window.onload = function(){
+	// obtain DOM elements
 	canvas = document.getElementById("game");
 	context = canvas.getContext("2d");
 	audio = document.getElementById("win");
@@ -379,19 +417,24 @@ window.onload = function(){
 	bgm = document.getElementById("bgm");
 	bgm.play();
 
+	// attach reset to reset button
 	resetButton = document.getElementById("reset");
 	resetButton.addEventListener("click", function(){
 		// context.clearRect(0, 0, 600, 600);
 		initRects();
 	});
 
+	// 老板, 换碟!
 	bgm.onended = function(){
 		shuffleMusic();
 		bgm.currentTime = 0;
 		bgm.play();
 	}
 
+	// initialize all rectangles
 	initRects();
+
+	// start polling
 	threadID = startCheck();
 };
 
