@@ -13,7 +13,8 @@ const agentCount = agentState.length;
 var actionId = 0;
 var timeInterval = 80;
 var directions = ["down", "up"]; // initial directions
-var positions = [[30, 30], [10, 10]]; // initial postions
+// var positions = [[30, 30], [10, 10]]; // initial postions
+var positions = [[80, 80], [60, 60]]; // initial postions
 var drawing = [false, false]; // initial drawing state(?)
 var musicCount = 5; // track amount
 // var rectsInd;
@@ -227,7 +228,7 @@ function fillArea(id_){
 	
 	lineInd = genArray(120, 120, function(x, y){ 
 		if(lineInd[x][y] == id_){
-			rectsInd[x][y] = id_;
+			// rectsInd[x][y] = id_;
 			return -1;
 		}else{
 			return lineInd[x][y];
@@ -277,6 +278,8 @@ function updateView(data){
 		if(isValid(nextP)){
 			// oldP = positions[i].map(function(t){return t;});
 			positions[i] = nextP;
+		}else{ // if hits edge, agent will die 
+			agentState[i] = false; 
 		}
 		// drawRect(context, positions[i][0], positions[i][1], i, true);
 		// draw current agent
@@ -284,28 +287,60 @@ function updateView(data){
 		// lineInd[y][x] == i;
 		if(rectsInd[y][x] != i){ // if out of any blocks, switch drawing to true
 			drawing[i] = true;
+		}else{
+			drawing[i] = false;
 		}
+
 		if((lineInd[y][x] != -1) && (lineInd[y][x] != i)){ // if encounters oppenents
 			agentState[lineInd[y][x]] = false;  // mark opponent DEAD
 		}
+
 		if((rectsInd[y][x] == i) && (drawing[i] == false)){ // if inside blocks and not drawing
 			drawRect(context, positions[i][0], positions[i][1], i, true, true);
 			continue;
 		}
+
 		var nnp = addPoint(positions[i], directionWay);
 		if(lineInd[y][x] == i && (isValid(nnp))){ // if meets itself, thus go backward
 			agentState[lineInd[y][x]] = false; // mark itself DEAD
 		}
-		
-		if(near(y, x, i, oldP) && isValid(nnp)){ // if meets the blocks of itself, and not heading out
-			drawRect(context, positions[i][0], positions[i][1], i, true); // draw agent style point
-			fillArea(i); // fill all closed areas
-			if(rectsInd[y][x] == i){
-				drawing[i] = false; // switch to not drawing
+
+		if(inBlock(y, x, i)){
+			drawing[i] = false;
+			fillArea(i);
+		}else{
+			if(near(y, x, i, oldP) && isValid(nnp)){ // if meets the blocks of itself, and not heading out
+				drawRect(context, positions[i][0], positions[i][1], i, true); // draw agent style point
+				fillArea(i); // fill all closed areas
+				if(rectsInd[y][x] == i){
+					drawing[i] = false; // switch to not drawing
+				}
+			}else{
+				drawRect(context, positions[i][0], positions[i][1], i, true, drawing);
 			}
+		// drawRect(context, positions[i][0], positions[i][1], i, true);
 		}
-		drawRect(context, positions[i][0], positions[i][1], i, true);
-		
+
+		if(rectsInd[y][x] != i){ // if out of any blocks, switch drawing to true
+			drawing[i] = true;
+		}else{
+			drawing[i] = false;
+		}
+	}
+}
+
+function inBlock(x, y, id){
+	var dirs = [[0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1], [0, 0]];
+	var count = 0;
+	for(var k = 0; k < dirs.length; k++){
+		if(lineInd[x][y] == id || rectsInd[x][y] == id){
+			count += 1;
+		}
+	}
+	if(count >= 3){
+		return true;
+	}else{
+		return false;
 	}
 }
 
@@ -373,6 +408,7 @@ function initRects(idExcept = -1){ // idExcept -- winner, if -1, then clear all
 		if(k == idExcept){
 			continue;
 		}
+		drawing[k] = false;
 		for (var i = dirs.length - 1; i >= 0; i--) {
 			var tmp = addPoint(positions[k], dirs[i]);
 			if(isValid(tmp)){

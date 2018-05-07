@@ -9,14 +9,18 @@
 2. 在本目录打开命令行,或者在命令行中切换到本游戏根目录,输入以下命令:  
 ```shell
 python3 game.py
-python3 MBGame/manage.py runserver 8080  
+```
+并在另一个命令行窗口中运行以下命令:
+```shell
+cd MBGame
+python3 manage.py runserver 8080  
 ```
 3. 在浏览器打开`localhost:8080/paperio/game`
 4. Have Fun!
 
 ## 查看串口标识符的方法
 
-### Macs
+### Mac
 `ls /dev/tty.usbmodem*`
 ### Linux
 欢迎补充,可能和Mac差不多

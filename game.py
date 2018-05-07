@@ -69,7 +69,7 @@ def showDir(n):
     }
     return dirs[n]
 
-pathString = "game/MBGame/paperio/stats.json" # recorder file
+pathString = "MBGame/paperio/stats.json" # recorder file
 if __name__ == "__main__":
 
     # create thread reading directions
