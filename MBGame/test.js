@@ -296,7 +296,7 @@ function updateView(data){
 		}
 
 		if((rectsInd[y][x] == i) && (drawing[i] == false)){ // if inside blocks and not drawing
-			drawRect(context, positions[i][0], positions[i][1], i, true, true);
+			drawRect(context, positions[i][0], positions[i][1], i, true, drawing[i]);
 			continue;
 		}
 
@@ -307,7 +307,7 @@ function updateView(data){
 
 		if(inBlock(y, x, i)){
 			drawing[i] = false;
-			fillArea(i);
+			// fillArea(i);
 		}else{
 			if(near(y, x, i, oldP) && isValid(nnp)){ // if meets the blocks of itself, and not heading out
 				drawRect(context, positions[i][0], positions[i][1], i, true); // draw agent style point
@@ -316,7 +316,7 @@ function updateView(data){
 					drawing[i] = false; // switch to not drawing
 				}
 			}else{
-				drawRect(context, positions[i][0], positions[i][1], i, true, drawing);
+				drawRect(context, positions[i][0], positions[i][1], i, true, drawing[i]);
 			}
 		// drawRect(context, positions[i][0], positions[i][1], i, true);
 		}
@@ -358,7 +358,7 @@ function near(i, j, id, oldP){
 	for (var cl = dirs.length - 1; cl >= 0; cl--) {
 		var np = addPoint([i, j], dirs[cl]);
 		if(cmp(np, swapA(oldP))){
-			// console.log("here closes");
+			console.log("here closes");
 			continue;
 		}
 		var xx = np[0], yy = np[1];

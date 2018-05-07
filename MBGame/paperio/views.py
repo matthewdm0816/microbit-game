@@ -7,7 +7,7 @@ def index(req):
     return HttpResponse("Hello World!")
 
 def game(request):
-    with open("test.js", mode='r') as f:
+    with open("pass.js", mode='r') as f:
         js = f.read()
 
     # game_temp = loader.get_template("paperio/game.html")
