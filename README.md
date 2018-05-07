@@ -7,16 +7,16 @@
 0. 在game.py中设置本机的串口的标识符(查看方式见后)
 1. 连接microbit至电脑的USB口(记得烧录代码,并且不同手柄用板子烧录的ID需不同!)
 2. 在本目录打开命令行,或者在命令行中切换到本游戏根目录,输入以下命令:  
-``
-python3 game.py  
+```shell
+python3 game.py
 python3 MBGame/manage.py runserver 8080  
-``  
+```
 3. 在浏览器打开`localhost:8080/paperio/game`
 4. Have Fun!
 
 ## 查看串口标识符的方法
 
-### Mac
+### Macs
 `ls /dev/tty.usbmodem*`
 ### Linux
 欢迎补充,可能和Mac差不多
@@ -29,3 +29,6 @@ python3 MBGame/manage.py runserver 8080
 
 ## 注意事项
 1. 记得烧录代码,并且不同手柄用板子烧录的ID需不同!
+2. 如果网页打不开,试试`127.0.0.1:8080/paperio/game`
+3. **不要用IE打开,不要用IE打开,不要用IE打开!**(重要的事情说三遍)
+
