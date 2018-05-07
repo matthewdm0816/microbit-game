@@ -172,7 +172,7 @@ function fillArea(id_){
 	var dummyRects = genArray(120, 120, function(x, y){ return -1; });
 	for(var i = 0; i < 120; i++){
 		for(var j = 0; j < 120; j++){
-			if((lineInd[i][j] == -1) && (dummyRects[i][j] == -1) && (rectsInd[i][j] == -1)){
+			if((lineInd[i][j] != id_) && (dummyRects[i][j] == -1) && (rectsInd[i][j] != id_)){
 				ret = findRects(i, j, id_);
 				if(ret.open == false){
 					for (var c = ret.points.length - 1; c >= 0; c--) {
@@ -263,7 +263,7 @@ function updateView(data){
 		if((lineInd[y][x] != -1) && (lineInd[y][x] != i)){ // if encounters oppenents
 			agentState[lineInd[y][x]] = false;  // mark opponent DEAD
 		}
-		if((rectsInd[y][x] == i) /*&& (drawing == false)*/){ // if inside blocks and not drawing
+		if((rectsInd[y][x] == i) && (drawing == false)){ // if inside blocks and not drawing
 			drawRect(context, positions[i][0], positions[i][1], i, true, true);
 			continue;
 		}
@@ -324,6 +324,10 @@ function initRects(idExcept = -1){ // idExcept -- winner
 	// if(idExcept == -1){ clearAllRects(); }
 	for(var p = 0; p < 120; p++){
 		for(var q = 0; q < 120; q++){
+			if(idExcept == -1){
+				clearRect(context, q, p);
+				continue;
+			}
 			if(lineInd[p][q] == idExcept || rectsInd[p][q] == idExcept){
 				// clearRect(context, q, p);
 			}else{
@@ -373,6 +377,7 @@ window.onload = function(){
 	audio = document.getElementById("win");
 	audio.pause();
 	bgm = document.getElementById("bgm");
+	bgm.play();
 
 	resetButton = document.getElementById("reset");
 	resetButton.addEventListener("click", function(){
