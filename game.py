@@ -19,8 +19,10 @@ def readAcc():
     try:
         while True:
             # get data from serial port
-            data = list(map(int, s.readline().decode("utf-8").rstrip().split(" ")))
-
+            try:
+                data = list(map(int, s.readline().decode("utf-8").rstrip().split(" ")))
+            except:
+                continue
             # put data into a Queue
             lock.acquire()
             try:

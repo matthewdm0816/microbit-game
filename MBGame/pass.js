@@ -35,7 +35,6 @@ var directions = ["down", "up"]; // initial directions
 var positions = [[80, 80], [60, 60]]; // initial postions
 var drawing = [false, false]; // initial drawing state(?)
 var musicCount = 5; // track amount
-// var rectsInd;
 const totalBlocks = 120 * 120;
 
 const directionWays = {
@@ -182,6 +181,7 @@ function clearAll(){
 	context.clearRect(0, 0, 600, 600);
 }
 
+// update canvas according to lineInd and rectInd
 function updateCanvas(){
 	clearAll();
 	for(var m = 0; m < 120; m++){
@@ -306,7 +306,7 @@ function fillArea(id_){
 }
 
 function updateView(data){
-	// obtain canvas object
+	// obtain canvas object, actually of no use
 	canvas = document.getElementById("game");
 
 	// check whether data is empty
@@ -339,7 +339,7 @@ function updateView(data){
 		var oldP; // prev point
 		var nextP = addPoint(positions[i], directionWay); // next point
 		oldP = positions[i].map(function(t){return t;}); // record previous point
-
+		var last_in_rects = (rectsInd[oldP[1]][oldP[0]] == i);
 		if(isValid(nextP)){
 			// oldP = positions[i].map(function(t){return t;});
 			positions[i] = nextP;
@@ -353,6 +353,9 @@ function updateView(data){
 		}
 
 		if(rectsInd[y][x] == i){ // if inside painted area 
+			if(last_in_rects == false){
+				fillArea();
+			}
 			updateCanvas();
 			continue; // do nothing;
 		}else{
@@ -431,9 +434,6 @@ function near(i, j, id){
 
 function displayEgg(){
 	
-}
-
-
-
+}	
 
 
