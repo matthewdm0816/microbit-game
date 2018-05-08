@@ -1,5 +1,6 @@
 # Microbit-Game:Paper.io
-  
+> May the force be with you.
+
 一个通过microbit单片机作为控制手柄的paper.io游戏,界面是一个利用django搭建的网站  
 运行需要的依赖:django 2.0.4, pyserial  
 
@@ -37,4 +38,12 @@ python3 manage.py runserver 8080
 1. 记得烧录代码,并且不同手柄用板子烧录的ID需不同!
 2. 如果网页打不开,试试`127.0.0.1:8080/paperio/game`
 3. **不要用IE打开,不要用IE打开,不要用IE打开!**(重要的事情说三遍)
+
+##TODO(虽然可能再也不会写了OvO)
+1. 增加多人支持,支持三人及以上的游戏模式.
+2. 增加背景音乐,增加暂停功能.
+3. 修复可能的bug,增加网页游戏性能.
+
+
+
 
