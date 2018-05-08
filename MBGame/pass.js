@@ -29,7 +29,7 @@ var agentState = [true, true]; // agent living style
 const clearStyle = "#FFFFFF"; 
 const agentCount = agentState.length;
 var actionId = 0;
-var timeInterval = 80;
+var timeInterval = 80; // refresh interval
 var directions = ["down", "up"]; // initial directions
 // var positions = [[30, 30], [10, 10]]; // initial postions
 var positions = [[80, 80], [60, 60]]; // initial postions
@@ -305,6 +305,19 @@ function fillArea(id_){
 	updateCanvas();
 }
 
+function fillLine(id){
+	// console.log("fillLine called on id " + id);
+	for(var i = 0; i < 120; i++){ 
+		for(var j = 0; j < 120; j++){
+			if(lineInd[i][j] == id){
+				lineInd[i][j] = -1;
+				rectsInd[i][j] = id;
+			}
+		}
+	}
+	updateCanvas();
+}
+
 function updateView(data){
 	// obtain canvas object, actually of no use
 	canvas = document.getElementById("game");
@@ -354,14 +367,15 @@ function updateView(data){
 
 		if(rectsInd[y][x] == i){ // if inside painted area 
 			if(last_in_rects == false){
-				fillArea();
+				fillLine(i);
+				// console.log("here");
 			}
-			updateCanvas();
+			// updateCanvas();
 			continue; // do nothing;
 		}else{
 			lineInd[y][x] = i;
 			fillArea(i);
-			updateCanvas();
+			// updateCanvas();
 		}
 
 		
